@@ -83,3 +83,7 @@ class UserSerializer(serializers.ModelSerializer):
     #             "error": "Both phone number and password are required."
     #         })
     #     return attrs   
+    
+    class LoginSerializer(serializers.Serializer):
+        phone_number = serializers.CharField()
+        password = serializers.CharField(style={'input_type': 'password'})

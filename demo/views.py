@@ -18,6 +18,10 @@ from rest_framework.permissions import AllowAny
 from rest_framework.decorators import api_view
 
 from django.contrib.auth.models import User
+from django.contrib.auth import logout
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authtoken.models import Token
+
 
 
 
@@ -90,7 +94,34 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 
-    @action(detail=False, methods=['POST'], permission_classes=[AllowAny])
+    # @action(detail=False, methods=['POST'], permission_classes=[AllowAny])
+    # def login(self, request):
+    #     phone_number = request.data.get('phone_number')
+    #     password = request.data.get('password')
+        
+    #     if not phone_number or not password:
+    #         return Response({
+    #             'error': 'Please provide both phone_number and password'
+    #         }, status=status.HTTP_400_BAD_REQUEST)
+        
+    #     user = authenticate(request, username=phone_number, password=password)
+        
+    #     if user is not None:
+    #         login(request, user)
+    #         return Response({
+    #             'message': 'Login successful',
+    #             'user_id': user.id
+    #         }, status=status.HTTP_200_OK)
+    #     else:
+    #         return Response({
+    #             'error': 'Invalid credentials'
+    #         }, status=status.HTTP_401_UNAUTHORIZED)
+            
+            
+    # demo/views.py
+
+    
+    @action(detail=False, methods=['POST'])
     def login(self, request):
         phone_number = request.data.get('phone_number')
         password = request.data.get('password')
@@ -100,17 +131,62 @@ class UserViewSet(viewsets.ModelViewSet):
                 'error': 'Please provide both phone_number and password'
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        user = authenticate(request, username=phone_number, password=password)
+        user = authenticate(username=phone_number, password=password)
         
-        if user is not None:
-            login(request, user)
+        if user:
+            token, _ = Token.objects.get_or_create(user=user)
             return Response({
                 'message': 'Login successful',
+                'token': token.key,
                 'user_id': user.id
-            }, status=status.HTTP_200_OK)
-        else:
-            return Response({
-                'error': 'Invalid credentials'
-            }, status=status.HTTP_401_UNAUTHORIZED)
+            })
+        return Response({
+            'error': 'Invalid credentials'
+        }, status=status.HTTP_401_UNAUTHORIZED)
+    @action(detail=False, methods=['GET'], permission_classes=[IsAuthenticated])
+    def profile(self, request):
+        serializer = self.get_serializer(request.user)
 
-    # Your existing verify_otp and regenerate_otp methods...
+
+# Add this to your existing UserViewSet class
+
+
+    @action(detail=False, methods=['GET'], permission_classes=[IsAuthenticated])
+    def profile(self, request):
+        """
+        Get the profile information of the logged-in user
+        """
+        try:
+            # Get the current logged-in user
+            user = request.user
+            user_profile = UserModel.objects.get(phone_number=user.phone_number)
+            
+            # Serialize the user data
+            serializer = self.get_serializer(user_profile)
+            
+            return Response({
+                'status': 'success',
+                'message': 'Profile data retrieved successfully',
+                'data': serializer.data
+            }, status=status.HTTP_200_OK)
+            
+        except UserModel.DoesNotExist:
+            return Response({
+                'status': 'error',
+                'message': 'User profile not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+
+
+
+
+
+
+    
+    
