@@ -182,11 +182,26 @@ class UserViewSet(viewsets.ModelViewSet):
                 'message': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
-
-
-
-
-
-
-    
-    
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    def logout(self, request):
+        """
+        Logout the currently authenticated user by deleting their auth token
+        """
+        try:
+            # Ensure the user has a token to delete
+            if hasattr(request.user, 'auth_token'):
+                request.user.auth_token.delete()
+                return Response({
+                    'status': 'success',
+                    'message': 'Successfully logged out'
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response({
+                    'status': 'error',
+                    'message': 'User does not have a valid token'
+                }, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
