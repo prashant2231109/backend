@@ -13,8 +13,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 # from dotenv import load_dotenv #yes
-import environ
-env = environ.Env()
+# import environ
+# env = environ.Env()
 
 import os
 
@@ -25,8 +25,8 @@ import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-environ.Env.read_env(BASE_DIR / '.env')
-SMS_API_KEY = env("SMS_API_KEY")
+# environ.Env.read_env(BASE_DIR / '.env')
+# SMS_API_KEY = env("SMS_API_KEY")
 
 # SMS_API_KEY = os.environ.get("SMS_API_KEY") #yes
 
@@ -46,7 +46,7 @@ SECRET_KEY = 'django-insecure-0o1ze0!pyu4rooxunt3&-jyk2_70q()4t5&rw12)im=lwfd2w%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -76,6 +76,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     
 ]
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+
 
 ROOT_URLCONF = 'src.urls'
 
